@@ -1,4 +1,4 @@
-// OWNER: (do trợ lý làm sẵn) · Module: Chi tiết hợp đồng — có timeline duyệt + phụ lục + hành động theo trạng thái
+// Module: Chi tiết hợp đồng — timeline duyệt + phụ lục + hành động theo trạng thái
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api, errMsg } from "../api/client";

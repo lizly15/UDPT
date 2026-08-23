@@ -1,4 +1,4 @@
-// OWNER: (do trợ lý làm sẵn) · Module: Chi tiết bảng thanh toán — dòng dịch vụ + submit + ký điện tử (poll) + timeline
+// Module: Chi tiết bảng thanh toán — dòng dịch vụ + submit + ký điện tử (poll) + timeline
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api, errMsg } from "../api/client";

@@ -8,10 +8,10 @@ Mẫu tham khảo: `pages/Customers.tsx` (FE-A), `pages/Notifications.tsx` (FE-B
 
 | Màn hình | File | Người làm |
 |---|---|---|
-| Khách hàng | `Customers.tsx` | ✅ trợ lý (mẫu) |
-| Thông báo | `Notifications.tsx` | ✅ trợ lý (mẫu) |
-| Chi tiết hợp đồng | `ContractDetail.tsx` | ✅ trợ lý (đã làm) |
-| Chi tiết bảng thanh toán + ký | `PaymentDetail.tsx` | ✅ trợ lý (đã làm) |
+| Khách hàng | `Customers.tsx` | ✅ Đã làm |
+| Thông báo | `Notifications.tsx` | ✅ Đã làm |
+| Chi tiết hợp đồng | `ContractDetail.tsx` | ✅ Đã làm |
+| Chi tiết bảng thanh toán + ký | `PaymentDetail.tsx` | ✅ Đã làm |
 | **Dịch vụ** | `ServiceCatalog.tsx` | **FE-A** |
 | **Hợp đồng (list)** | `Contracts.tsx` | **FE-A** |
 | **Bảng giá** | `Pricing.tsx` | **FE-A** |
@@ -20,10 +20,6 @@ Mẫu tham khảo: `pages/Customers.tsx` (FE-A), `pages/Notifications.tsx` (FE-B
 | **Bảng thanh toán (list)** | `Payments.tsx` | **FE-B** |
 | **Chờ tôi duyệt** | `ApprovalInbox.tsx` | **FE-B** |
 | **Quản trị** | `Admin.tsx` | **FE-B** |
-
-> FE-A và FE-B mỗi người **4 màn dễ**; 2 màn chi tiết khó (có timeline + ký điện tử async) trợ lý đã làm sẵn để tham khảo. Chi tiết từng màn ở dưới.
-
----
 
 **Yêu cầu chung cho MỌI màn (Definition of Done):**
 - [ ] Gọi API thật qua `api` trong `src/api/client.ts` (không hardcode dữ liệu).
@@ -56,7 +52,7 @@ Mẫu tham khảo: `pages/Customers.tsx` (FE-A), `pages/Notifications.tsx` (FE-B
 - [ ] Nút "Tạo hợp đồng" (role SALES) → `Modal` + form (code, customer_code, title, value, payment_terms, service_terms) → `POST /contracts`.
   - Gợi ý: `customer_code` nên là dropdown lấy từ `GET /customers`.
 
-## A3. Chi tiết hợp đồng — `pages/ContractDetail.tsx` ✅ (trợ lý đã làm — không cần làm)
+## A3. Chi tiết hợp đồng — `pages/ContractDetail.tsx` ✅ (Đã làm — không cần làm)
 - [ ] Load `GET /contracts/{code}` → hiển thị đầy đủ field + `StatusBadge`.
 - [ ] Form sửa (chỉ khi status ∈ {Draft, RevisionRequested}) → `PUT /contracts/{code}` (title, effective_from, effective_to, value, has_attachment...).
   - Nhớ có field **đính kèm tài liệu** (`has_attachment`) — bắt buộc trước khi Submit (CTR-02).
@@ -103,7 +99,7 @@ Mẫu tham khảo: `pages/Customers.tsx` (FE-A), `pages/Notifications.tsx` (FE-B
 - [ ] Nút "Lập bảng thanh toán" (role ACCOUNTANT) → `Modal` (customer_code, contract_code, period) → `POST /payments/generate`.
   - Xử lý lỗi: `CONTRACT_EXPIRED`, `CONTRACT_NOT_ACTIVE`, `NO_VOLUME`, `NO_PRICE`, `STATEMENT_EXISTS`.
 
-## B4. Chi tiết bảng thanh toán — `pages/PaymentDetail.tsx` ✅ (trợ lý đã làm — không cần làm)
+## B4. Chi tiết bảng thanh toán — `pages/PaymentDetail.tsx` ✅ (Đã làm — không cần làm)
 - [ ] Load `GET /payments/{id}` → bảng dòng dịch vụ (`DataTable`: service_code, quantity, unit_price, amount) + subtotal/tax/total.
 - [ ] Nút **Submit** (status Draft, role ACCOUNTANT) → `POST /payments/{id}/submit`. Lỗi `INVALID_TOTAL` nếu tổng ≤ 0.
 - [ ] Hiển thị **trạng thái ký điện tử**: `GET /workflows/esign/{id}` → badge (pending/signing/signed/failed). Nên **poll** vài giây khi đang Signing.
