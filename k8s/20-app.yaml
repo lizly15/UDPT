@@ -1,0 +1,276 @@
+# Các microservice ứng dụng. Image build sẵn từ docker-compose (qtkd-<service>).
+# Nạp image vào minikube trước: xem k8s/README.md
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: identity-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: identity-service } }
+  template:
+    metadata: { labels: { app: identity-service } }
+    spec:
+      containers:
+        - name: identity-service
+          image: qtkd-identity-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8001 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: identity-service }
+            - { name: PORT, value: "8001" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/authdb" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: identity-service, namespace: qtkd }
+spec:
+  selector: { app: identity-service }
+  ports: [{ port: 8001, targetPort: 8001 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: customer-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: customer-service } }
+  template:
+    metadata: { labels: { app: customer-service } }
+    spec:
+      containers:
+        - name: customer-service
+          image: qtkd-customer-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8002 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: customer-service }
+            - { name: PORT, value: "8002" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/customerdb" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: customer-service, namespace: qtkd }
+spec:
+  selector: { app: customer-service }
+  ports: [{ port: 8002, targetPort: 8002 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: contract-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: contract-service } }
+  template:
+    metadata: { labels: { app: contract-service } }
+    spec:
+      containers:
+        - name: contract-service
+          image: qtkd-contract-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8003 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: contract-service }
+            - { name: PORT, value: "8003" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/contractdb" }
+            - { name: WORKFLOW_URL, value: "http://workflow-service:8006" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: contract-service, namespace: qtkd }
+spec:
+  selector: { app: contract-service }
+  ports: [{ port: 8003, targetPort: 8003 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: pricing-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: pricing-service } }
+  template:
+    metadata: { labels: { app: pricing-service } }
+    spec:
+      containers:
+        - name: pricing-service
+          image: qtkd-pricing-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8004 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: pricing-service }
+            - { name: PORT, value: "8004" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/pricingdb" }
+            - { name: WORKFLOW_URL, value: "http://workflow-service:8006" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: pricing-service, namespace: qtkd }
+spec:
+  selector: { app: pricing-service }
+  ports: [{ port: 8004, targetPort: 8004 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: billing-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: billing-service } }
+  template:
+    metadata: { labels: { app: billing-service } }
+    spec:
+      containers:
+        - name: billing-service
+          image: qtkd-billing-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8005 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: billing-service }
+            - { name: PORT, value: "8005" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/billingdb" }
+            - { name: WORKFLOW_URL, value: "http://workflow-service:8006" }
+            - { name: CONTRACT_URL, value: "http://contract-service:8003" }
+            - { name: PRICING_URL, value: "http://pricing-service:8004" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: billing-service, namespace: qtkd }
+spec:
+  selector: { app: billing-service }
+  ports: [{ port: 8005, targetPort: 8005 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: workflow-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: workflow-service } }
+  template:
+    metadata: { labels: { app: workflow-service } }
+    spec:
+      containers:
+        - name: workflow-service
+          image: qtkd-workflow-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8006 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: workflow-service }
+            - { name: PORT, value: "8006" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/workflowdb" }
+            - { name: MOCK_ESIGN_URL, value: "http://mock-esign:8009" }
+            - { name: SELF_URL, value: "http://workflow-service:8006" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: workflow-service, namespace: qtkd }
+spec:
+  selector: { app: workflow-service }
+  ports: [{ port: 8006, targetPort: 8006 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: notification-service, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: notification-service } }
+  template:
+    metadata: { labels: { app: notification-service } }
+    spec:
+      containers:
+        - name: notification-service
+          image: qtkd-notification-service:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8007 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: notification-service }
+            - { name: PORT, value: "8007" }
+            - { name: DATABASE_URL, value: "postgresql+psycopg2://qtkd:qtkd@postgres:5432/notifdb" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: notification-service, namespace: qtkd }
+spec:
+  selector: { app: notification-service }
+  ports: [{ port: 8007, targetPort: 8007 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: mock-esign, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: mock-esign } }
+  template:
+    metadata: { labels: { app: mock-esign } }
+    spec:
+      containers:
+        - name: mock-esign
+          image: qtkd-mock-esign:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8009 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: mock-esign }
+            - { name: PORT, value: "8009" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: mock-esign, namespace: qtkd }
+spec:
+  selector: { app: mock-esign }
+  ports: [{ port: 8009, targetPort: 8009 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: api-gateway, namespace: qtkd }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: api-gateway } }
+  template:
+    metadata: { labels: { app: api-gateway } }
+    spec:
+      containers:
+        - name: api-gateway
+          image: qtkd-api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8080 }]
+          envFrom:
+            - configMapRef: { name: qtkd-config }
+            - secretRef: { name: qtkd-secret }
+          env:
+            - { name: SERVICE_NAME, value: api-gateway }
+            - { name: PORT, value: "8080" }
+            - { name: IDENTITY_URL, value: "http://identity-service:8001" }
+            - { name: CUSTOMER_URL, value: "http://customer-service:8002" }
+            - { name: CONTRACT_URL, value: "http://contract-service:8003" }
+            - { name: PRICING_URL, value: "http://pricing-service:8004" }
+            - { name: BILLING_URL, value: "http://billing-service:8005" }
+            - { name: WORKFLOW_URL, value: "http://workflow-service:8006" }
+            - { name: NOTIFICATION_URL, value: "http://notification-service:8007" }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: api-gateway, namespace: qtkd }
+spec:
+  type: NodePort
+  selector: { app: api-gateway }
+  ports: [{ port: 8080, targetPort: 8080, nodePort: 30080 }]

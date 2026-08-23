@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Báo cáo Đồ án UDPT</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">body { font-family: "Segoe UI", Inter, system-ui, sans-serif; max-width: 900px;
+margin: 2rem auto; padding: 0 1.5rem; color: #1e293b; line-height: 1.55; font-size: 15px; }
+h1 { color: #1f4e79; }
+h2 { color: #1f4e79; border-bottom: 2px solid #e2e8f0; padding-bottom: .3rem; margin-top: 2rem; }
+h3 { color: #2c6598; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 14px; }
+th, td { border: 1px solid #cbd5e1; padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #1f4e79; color: #fff; }
+tr:nth-child(even) td { background: #f8fafc; }
+code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 90%; }
+pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+pre code { background: none; color: inherit; }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Báo cáo Đồ án UDPT</h1>
+<p class="subtitle">Đề tài: Hệ thống Quản trị Kinh doanh
+(Microservices)</p>
+</header>
+<section id="đồ-án-thực-hành-ứng-dụng-phân-tán" style="text-align:center">
+<h1>ĐỒ ÁN THỰC HÀNH — ỨNG DỤNG PHÂN TÁN</h1>
+<h2 id="đề-tài-hệ-thống-quản-trị-kinh-doanh">Đề tài: HỆ THỐNG QUẢN TRỊ
+KINH DOANH</h2>
+<p><strong>Trường Đại học Khoa học Tự nhiên – ĐHQG TP.HCM · Khoa Công
+nghệ Thông tin</strong> <strong>Giảng viên:</strong> Nguyễn Trường Sơn ·
+Phạm Minh Tú</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>MSSV</th>
+<th>Họ tên</th>
+<th>Phụ trách</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>21126027</td>
+<td>Nguyễn Tuấn Kiệt</td>
+<td>Backend nền tảng: Gateway, Identity, Workflow, Kafka/Outbox,
+K8s</td>
+</tr>
+<tr>
+<td>21126057</td>
+<td>Nguyễn Hoàng Danh</td>
+<td>Backend nghiệp vụ: Customer, Contract, Pricing, Billing, mock-esign,
+seed/test</td>
+</tr>
+<tr>
+<td>21126028</td>
+<td>Vũ Huyền Thiên Lý</td>
+<td>Frontend (shell, auth, Customers/Contracts/Pricing) + Design +
+Report</td>
+</tr>
+<tr>
+<td>22127247</td>
+<td>Nguyễn Thế Thanh Long</td>
+<td>Frontend (Approval, Notifications, Volumes, Payments, Audit,
+Admin)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<div style="page-break-after:always">
+
+</div>
+<h2 id="giới-thiệu-phạm-vi">1. Giới thiệu &amp; phạm vi</h2>
+<p>Công ty logistics ABC cần một hệ thống tập trung quản lý <strong>vòng
+đời hồ sơ kinh doanh</strong>: khách hàng → hợp đồng → phụ lục → bảng
+giá → sản lượng → bảng thanh toán → phê duyệt → <strong>ký điện
+tử</strong>, kèm <strong>thông báo bất đồng bộ</strong> và <strong>nhật
+ký truy vết</strong>. Hệ thống thay thế quy trình thủ công (email/Excel)
+vốn phân tán, khó kiểm soát trạng thái và truy vết.</p>
+<p>Đồ án hiện thực theo <strong>kiến trúc microservices</strong> với đầy
+đủ yêu cầu kỹ thuật: API Gateway, ≥4 service nghiệp vụ, PostgreSQL (DB
+riêng mỗi service), Redis, Kafka, Docker Compose, Kubernetes, JWT,
+OpenAPI.</p>
+<h2 id="kiến-trúc-tổng-thể">2. Kiến trúc tổng thể</h2>
+<p>Hệ thống gồm <strong>9 service</strong> (6 nghiệp vụ + identity +
+gateway + mock-esign) chạy độc lập:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Service</th>
+<th>Port</th>
+<th>Database</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api-gateway</td>
+<td>8080</td>
+<td>—</td>
+<td>Reverse proxy, verify JWT, rate-limit, idempotency</td>
+</tr>
+<tr>
+<td>identity-service</td>
+<td>8001</td>
+<td>authdb</td>
+<td>User, role, JWT (access/refresh), blacklist</td>
+</tr>
+<tr>
+<td>customer-service</td>
+<td>8002</td>
+<td>customerdb</td>
+<td>Khách hàng + danh mục dịch vụ</td>
+</tr>
+<tr>
+<td>contract-service</td>
+<td>8003</td>
+<td>contractdb</td>
+<td>Hợp đồng + phụ lục (CTR-01..07)</td>
+</tr>
+<tr>
+<td>pricing-service</td>
+<td>8004</td>
+<td>pricingdb</td>
+<td>Bảng giá + version (PRC-01..06)</td>
+</tr>
+<tr>
+<td>billing-service</td>
+<td>8005</td>
+<td>billingdb</td>
+<td>Sản lượng + bảng thanh toán (PAY-01..07)</td>
+</tr>
+<tr>
+<td>workflow-service</td>
+<td>8006</td>
+<td>workflowdb</td>
+<td>Engine phê duyệt data-driven + điều phối ký điện tử (APR)</td>
+</tr>
+<tr>
+<td>notification-service</td>
+<td>8007</td>
+<td>notifdb</td>
+<td>Thông báo + audit log</td>
+</tr>
+<tr>
+<td>mock-esign</td>
+<td>8009</td>
+<td>—</td>
+<td>Nhà cung cấp ký điện tử giả lập (async callback)</td>
+</tr>
+</tbody>
+</table>
+<pre><code>   Browser/Swagger ──JWT──&gt; API Gateway :8080 ──&gt; [identity|customer|contract|
+                                 │  (verify JWT,      pricing|billing|workflow|
+                                 │   rate-limit,      notification]
+                                 │   idempotency)          │
+                                 └── Redis                 │ Outbox
+   contract/pricing/billing ──REST submit──&gt; workflow      ▼
+   billing ──REST(giá,HĐ)──&gt; contract,pricing           Kafka ──&gt; workflow,
+   workflow ──HTTP──&gt; mock-esign ──callback──&gt; workflow  notification, billing,
+   Mỗi service ─── PostgreSQL (7 DB riêng)               contract, pricing</code></pre>
+<p><strong>Nguyên tắc giao tiếp:</strong> đồng bộ (REST) cho lệnh tức
+thời; <strong>bất đồng bộ (Kafka + Outbox)</strong> cho lan truyền sự
+kiện (kết quả duyệt, ký, thông báo, audit). Xem sơ đồ chi tiết &amp;
+sequence tại <code>docs/architecture.md</code>.</p>
+<h2 id="công-nghệ-sử-dụng">3. Công nghệ sử dụng</h2>
+<ul>
+<li><strong>Backend:</strong> FastAPI + SQLAlchemy 2 + Pydantic v2
+(Python 3.12); OpenAPI/Swagger tự sinh.</li>
+<li><strong>CSDL:</strong> PostgreSQL 16 — 1 cụm, <strong>mỗi service 1
+database riêng</strong>.</li>
+<li><strong>Bất đồng bộ:</strong> Apache Kafka (KRaft) + <strong>Outbox
+Pattern</strong> (confluent-kafka).</li>
+<li><strong>Cache/Điều tiết:</strong> Redis (rate-limit,
+idempotency-key, JWT blacklist).</li>
+<li><strong>Xác thực:</strong> JWT (access + refresh) + RBAC 7
+role.</li>
+<li><strong>Frontend:</strong> React + Vite + TypeScript + TailwindCSS
+(khung + API client dùng chung).</li>
+<li><strong>Hạ tầng:</strong> Docker Compose (dev) + Kubernetes
+manifests (minikube).</li>
+</ul>
+<h2 id="thiết-kế-dữ-liệu">4. Thiết kế dữ liệu</h2>
+<p>Áp dụng <strong>Database-per-Service</strong>: cô lập dữ liệu, không
+FK xuyên service (liên kết bằng mã nghiệp vụ). Các bảng chính và ERD xem
+<code>docs/data-model.md</code>. Điểm quan trọng:
+<code>payment_lines.unit_price</code> được <strong>copy cứng</strong>
+tại thời điểm tính phí (PAY-03) để bảng thanh toán không đổi khi bảng
+giá thay đổi về sau.</p>
+<h2 id="thiết-kế-giao-diện">5. Thiết kế giao diện</h2>
+<p>Bộ <strong>design system</strong> (màu, typography, badge trạng thái,
+component chuẩn) tại <code>design/design-system.md</code>, dùng để dựng
+Figma và thống nhất UI. Frontend hiện thực bằng React theo khung mẫu ở
+<code>frontend/</code> (đã có API client tự refresh token, Auth, Layout,
+các màn Login/Dashboard/Customers; các màn còn lại theo
+<code>docs/frontend-handover.md</code>). <em>(Chèn screenshot các màn
+tại <code>report/screenshots/</code>.)</em></p>
+<h2 id="chi-tiết-service-api">6. Chi tiết service &amp; API</h2>
+<p>Mỗi service tự sinh Swagger tại <code>/docs</code>. Danh sách
+endpoint đầy đủ + quy ước (auth, lỗi chuẩn hóa, idempotency, roles) xem
+<code>docs/api.md</code>. Tóm tắt luồng: 1. Đăng nhập → nhận JWT → gọi
+API qua Gateway <code>/api/*</code>. 2. Kinh doanh: tạo Customer →
+Contract → submit → theo dõi timeline duyệt. 3. Người duyệt: xem
+<code>/tasks/inbox</code> → approve/reject. 4. Khai thác: nhập sản lượng
+→ khóa kỳ. 5. Kế toán: lập bảng thanh toán → submit → duyệt → hệ thống
+tự ký → Issued.</p>
+<h2 id="luồng-nghiệp-vụ-trọng-tâm">7. Luồng nghiệp vụ trọng tâm</h2>
+<p><strong>Duyệt hợp đồng (4 cấp):</strong></p>
+<pre><code>Sales submit ─&gt; contract tạo workflow (REST) ─&gt; workflow gán bước 1
+  ─&gt; [manager01 → legal01 → account01 → director01] approve
+  ─&gt; bước cuối: workflow phát DocApproved (Outbox→Kafka)
+  ─&gt; contract consume → status=Approved ─&gt; Sales activate → Active
+  (song song) notification: thông báo + ghi audit từng bước</code></pre>
+<p><strong>Bảng thanh toán + ký điện tử (bất đồng bộ):</strong></p>
+<pre><code>Kế toán generate (billing gọi contract kiểm hiệu lực + pricing lấy giá, copy giá)
+  ─&gt; submit ─&gt; duyệt [account01 → director01]
+  ─&gt; workflow: DocApproved + tự start_signing ─&gt; mock-esign (async)
+  ─&gt; callback signed ─&gt; esign.events:Signed ─&gt; billing status=Issued</code></pre>
+<p>Sequence chi tiết: <code>docs/architecture.md</code> mục 4–5.</p>
+<h2 id="xử-lý-bài-toán-phân-tán-điểm-nhấn-kỹ-thuật">8. Xử lý bài toán
+phân tán (điểm nhấn kỹ thuật)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Vấn đề</th>
+<th>Giải pháp</th>
+<th>Vị trí</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Quy trình duyệt không hard-code</strong></td>
+<td>Engine đọc định nghĩa quy trình từ DB
+(<code>workflow_definitions/step_defs</code>)</td>
+<td><code>workflow-service/services/engine.py</code></td>
+</tr>
+<tr>
+<td><strong>Double submit</strong> (SC-09)</td>
+<td><code>Idempotency-Key</code> (Redis, gateway) + instance duy nhất
+đang mở</td>
+<td><code>api-gateway</code>, <code>engine.create_instance</code></td>
+</tr>
+<tr>
+<td><strong>Race condition khi duyệt</strong> (SC-05)</td>
+<td>Optimistic locking <code>version_id</code> →
+<code>StaleDataError</code> → HTTP 409</td>
+<td><code>WorkflowInstance</code></td>
+</tr>
+<tr>
+<td><strong>Mất event</strong></td>
+<td><strong>Outbox Pattern</strong>: ghi DB + outbox cùng transaction,
+relay publish Kafka</td>
+<td><code>common/outbox.py</code></td>
+</tr>
+<tr>
+<td><strong>Phân quyền theo ngữ cảnh</strong> (SC-08)</td>
+<td>Kiểm tra đúng <strong>assignee</strong> ở bước hiện tại, không chỉ
+role</td>
+<td><code>engine.act</code></td>
+</tr>
+<tr>
+<td><strong>Dữ liệu lịch sử</strong> (SC-04/10)</td>
+<td>Chọn bảng giá theo ngày + copy đơn giá cứng</td>
+<td><code>pricing</code>, <code>billing</code></td>
+</tr>
+<tr>
+<td><strong>Service phụ lỗi</strong> (SC-07)</td>
+<td>Async + Outbox: nghiệp vụ chính không hỏng, bù event khi phục
+hồi</td>
+<td>Kafka + consumer idempotent</td>
+</tr>
+</tbody>
+</table>
+<p>Chi tiết mapping rule ↔︎ code:
+<code>docs/business-rules.md</code>.</p>
+<h2 id="triển-khai-cách-chạy">9. Triển khai &amp; cách chạy</h2>
+<p><strong>Docker Compose (dev):</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> up                      <span class="co"># build &amp; chạy 13 container</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> scripts/seed.py      <span class="co"># nạp dữ liệu mẫu A.1–A.8</span></span></code></pre></div>
+<p>Gateway: <code>:8080</code> · Swagger: <code>:8001..:8007/docs</code>
+· Kafka UI: <code>:8085</code>.</p>
+<p><strong>Kubernetes (minikube):</strong> manifests tại
+<code>k8s/</code> (namespace, config, hạ tầng, 9 service). Xem
+<code>k8s/README.md</code>.</p>
+<h2 id="kiểm-thử-minh-chứng">10. Kiểm thử &amp; minh chứng</h2>
+<ul>
+<li><strong>Seed tái tạo chính xác bộ dữ liệu mẫu</strong>: bảng thanh
+toán tháng 08/2026 = <strong>50.500.000đ</strong> với 5 dòng khớp tuyệt
+đối Phụ lục A.8 (Container20 7tr, Container40 5.5tr, Lưu kho 21tr, Vận
+chuyển 15tr, Kiểm đếm 2tr), trạng thái cuối <strong>Issued</strong> (đã
+ký điện tử).</li>
+<li><strong>Smoke test kịch bản nghiệp vụ</strong>:
+<code>bash scripts/smoke-test.sh</code> → <strong>14/14 assertion
+PASS</strong> cho SC-01..SC-10.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>SC</th>
+<th>Kết quả kiểm thử</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>Chặn submit thiếu đính kèm ✅</td>
+</tr>
+<tr>
+<td>02</td>
+<td>Chặn chồng hiệu lực bảng giá ✅</td>
+</tr>
+<tr>
+<td>03</td>
+<td>Chặn thanh toán HĐ hết hạn ✅</td>
+</tr>
+<tr>
+<td>04</td>
+<td>Đơn giá đã copy giữ nguyên ✅</td>
+</tr>
+<tr>
+<td>05</td>
+<td>Chỉ một Approve thành công ✅</td>
+</tr>
+<tr>
+<td>06</td>
+<td>Cho gửi ký lại ✅</td>
+</tr>
+<tr>
+<td>07</td>
+<td>Notif lỗi, nghiệp vụ chính OK + bù event ✅</td>
+</tr>
+<tr>
+<td>08</td>
+<td>Sai assignee bị chặn ✅</td>
+</tr>
+<tr>
+<td>09</td>
+<td>Submit nhiều lần → một workflow ✅</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Tính tháng cũ dùng giá cũ ✅</td>
+</tr>
+</tbody>
+</table>
+<p><em>(Chèn screenshot: Swagger, Kafka UI, kết quả seed, kết quả
+smoke-test, các màn giao diện.)</em></p>
+<h2 id="bảng-truy-vết-yêu-cầu">11. Bảng truy vết yêu cầu</h2>
+<p>Toàn bộ yêu cầu mục 4, 5, 6 và kịch bản A.12 được ánh xạ chi tiết
+trong <code>docs/requirements-traceability.md</code> — đảm bảo bao phủ
+100%.</p>
+<h2 id="phân-công-công-việc">12. Phân công công việc</h2>
+<p>Xem bảng ở trang bìa. Backend chia 2 track (nền tảng / nghiệp vụ);
+Frontend chia 2 người theo cụm màn hình
+(<code>docs/frontend-handover.md</code>); Report &amp; tích hợp: cả
+nhóm.</p>
+<h2 id="kết-luận-hướng-phát-triển">13. Kết luận &amp; hướng phát
+triển</h2>
+<p>Hệ thống đã hiện thực đầy đủ nghiệp vụ quản trị kinh doanh trên kiến
+trúc microservices, giải quyết trọn vẹn các bài toán phân tán trọng tâm
+(workflow cấu hình, Outbox, idempotency, optimistic locking, phân quyền
+ngữ cảnh, ký điện tử bất đồng bộ) và kiểm chứng bằng bộ test tự động.
+<strong>Hướng phát triển:</strong> thay Outbox relay bằng CDC
+(Debezium), thêm distributed tracing (OpenTelemetry), HPA/PVC trên K8s,
+và hoàn thiện giao diện web đầy đủ.</p>
+</body>
+</html>

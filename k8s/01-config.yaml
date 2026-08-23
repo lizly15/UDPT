@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qtkd-config
+  namespace: qtkd
+data:
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  REDIS_URL: "redis://redis:6379/0"
+  JWT_ALGORITHM: "HS256"
+  ACCESS_TOKEN_TTL_MIN: "60"
+  REFRESH_TOKEN_TTL_DAYS: "7"
+  LOG_LEVEL: "INFO"
+  PG_HOST: "postgres"
+  PG_USER: "qtkd"
+  PG_PASSWORD: "qtkd"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: qtkd-secret
+  namespace: qtkd
+type: Opaque
+stringData:
+  JWT_SECRET: "dev-secret-change-me"
+  POSTGRES_PASSWORD: "qtkd"

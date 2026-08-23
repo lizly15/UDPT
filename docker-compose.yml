@@ -1,0 +1,183 @@
+name: qtkd
+
+# ---- Cấu hình chung cho các FastAPI service ----
+x-svc-env: &svc-env
+  DATABASE_URL_TEMPLATE: "postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432"
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+  JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+  JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+  ACCESS_TOKEN_TTL_MIN: ${ACCESS_TOKEN_TTL_MIN:-60}
+  REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-7}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+x-svc-depends: &svc-depends
+  postgres:
+    condition: service_healthy
+  redis:
+    condition: service_started
+  kafka:
+    condition: service_started
+
+services:
+  # ================= INFRA =================
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-qtkd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qtkd}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-multi-db.sql:/docker-entrypoint-initdb.d/init-multi-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-qtkd}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  kafka:
+    image: apache/kafka:3.7.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: qtkd-cluster-0001
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8085:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: qtkd
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    depends_on:
+      - kafka
+
+  # ================= BUSINESS SERVICES =================
+  identity-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: identity-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: identity-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/authdb
+      PORT: 8001
+    ports: ["8001:8001"]
+    depends_on: *svc-depends
+
+  customer-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: customer-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: customer-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/customerdb
+      PORT: 8002
+    ports: ["8002:8002"]
+    depends_on: *svc-depends
+
+  contract-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: contract-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: contract-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/contractdb
+      PORT: 8003
+      WORKFLOW_URL: http://workflow-service:8006
+    ports: ["8003:8003"]
+    depends_on: *svc-depends
+
+  pricing-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: pricing-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: pricing-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/pricingdb
+      PORT: 8004
+      WORKFLOW_URL: http://workflow-service:8006
+    ports: ["8004:8004"]
+    depends_on: *svc-depends
+
+  billing-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: billing-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: billing-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/billingdb
+      PORT: 8005
+      WORKFLOW_URL: http://workflow-service:8006
+      CONTRACT_URL: http://contract-service:8003
+      PRICING_URL: http://pricing-service:8004
+    ports: ["8005:8005"]
+    depends_on: *svc-depends
+
+  workflow-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: workflow-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: workflow-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/workflowdb
+      PORT: 8006
+      MOCK_ESIGN_URL: http://mock-esign:8009
+      SELF_URL: http://workflow-service:8006
+    ports: ["8006:8006"]
+    depends_on: *svc-depends
+
+  notification-service:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: notification-service } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: notification-service
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-qtkd}:${POSTGRES_PASSWORD:-qtkd}@postgres:5432/notifdb
+      PORT: 8007
+    ports: ["8007:8007"]
+    depends_on: *svc-depends
+
+  mock-esign:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: mock-esign } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: mock-esign
+      PORT: 8009
+      BILLING_CALLBACK_URL: http://workflow-service:8006/internal/esign/callback
+    ports: ["8009:8009"]
+    depends_on: *svc-depends
+
+  # ================= EDGE =================
+  api-gateway:
+    build: { context: ./services, dockerfile: Dockerfile, args: { SERVICE: api-gateway } }
+    environment:
+      <<: *svc-env
+      SERVICE_NAME: api-gateway
+      PORT: 8080
+      IDENTITY_URL: http://identity-service:8001
+      CUSTOMER_URL: http://customer-service:8002
+      CONTRACT_URL: http://contract-service:8003
+      PRICING_URL: http://pricing-service:8004
+      BILLING_URL: http://billing-service:8005
+      WORKFLOW_URL: http://workflow-service:8006
+      NOTIFICATION_URL: http://notification-service:8007
+      RATE_LIMIT_PER_MIN: 120
+    ports: ["8080:8080"]
+    depends_on: *svc-depends
+
+volumes:
+  pgdata:

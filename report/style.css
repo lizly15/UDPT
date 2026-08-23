@@ -1,0 +1,12 @@
+body { font-family: "Segoe UI", Inter, system-ui, sans-serif; max-width: 900px;
+  margin: 2rem auto; padding: 0 1.5rem; color: #1e293b; line-height: 1.55; font-size: 15px; }
+h1 { color: #1f4e79; }
+h2 { color: #1f4e79; border-bottom: 2px solid #e2e8f0; padding-bottom: .3rem; margin-top: 2rem; }
+h3 { color: #2c6598; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 14px; }
+th, td { border: 1px solid #cbd5e1; padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #1f4e79; color: #fff; }
+tr:nth-child(even) td { background: #f8fafc; }
+code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 90%; }
+pre { background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+pre code { background: none; color: inherit; }

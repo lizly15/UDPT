@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node / Frontend
+node_modules/
+dist/
+frontend/.env
+*.local
+
+# Env & secrets (giữ .env.example, bỏ .env thật)
+.env
+
+# Data / build
+pgdata/
+*.zip
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
