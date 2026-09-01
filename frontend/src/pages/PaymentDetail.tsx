@@ -2,17 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, errMsg } from '../api/client';
 import { Payment, SigningSession } from '../types/payment';
+import { useAuth } from '../context/AuthContext';
+import PageHeader from '../components/PageHeader';
+import StatusBadge from '../components/StatusBadge';
+import ApprovalTimeline from '../components/ApprovalTimeline';
+import DataTable, { Column } from '../components/DataTable';
+import { ErrorBox, Spinner } from '../components/Feedback';
 
 export const PaymentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [payment, setPayment] = useState<Payment | null>(null);
   const [signingSession, setSigningSession] = useState<SigningSession | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const { hasRole } = useAuth();
+
+  // Kiểm tra quyền truy cập vào trang Chi tiết Thanh toán
+  const canView = hasRole('ACCOUNTANT', 'SALES_MANAGER', 'DIRECTOR', 'ADMIN');
 
   const fetchDetail = async () => {
     try {
       const paymentData = await api.get<Payment>(`/payments/${id}`);
       setPayment(paymentData);
-      
+
       const esignData = await api.get<SigningSession>(`/workflows/esign/${id}`);
       setSigningSession(esignData);
     } catch (err) {
@@ -21,87 +33,112 @@ export const PaymentDetail: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchDetail();
-    const interval = setInterval(() => {
+    if (canView) {
       fetchDetail();
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [id]);
+      const interval = setInterval(() => {
+        fetchDetail();
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [id, canView]);
 
   const handleSubmit = async () => {
     try {
+      setErrorMsg(null);
       const idempotencyKey = `pay-submit-${id}-${Date.now()}`;
       await api.post(`/payments/${id}/submit`, {}, idempotencyKey);
-      alert('Đã gửi duyệt thành công!');
       fetchDetail();
     } catch (err) {
-      alert(`Lỗi: ${errMsg(err)}`);
+      setErrorMsg(errMsg(err));
     }
   };
 
-  const handleResign = async () => {
-    try {
-      const idempotencyKey = `pay-resign-${id}-${Date.now()}`;
-      await api.post(`/workflows/esign/${id}/resign`, {}, idempotencyKey);
-      alert('Đã gửi ký lại!');
-      fetchDetail();
-    } catch (err) {
-      alert(`Lỗi: ${errMsg(err)}`);
-    }
-  };
 
-  if (!payment) return <div className="p-6">Đang tải...</div>;
 
-  // Chuẩn hóa trạng thái về chữ hoa để so sánh chuẩn xác
+  // Nếu không có quyền xem trang
+  if (!canView) {
+    return (
+      <div className="p-4">
+        <ErrorBox message="Bạn không có quyền xem chi tiết Bảng thanh toán này." />
+      </div>
+    );
+  }
+
+  if (!payment) return <Spinner />;
+
   const currentStatus = payment.status?.toUpperCase();
-  const signStatus = signingSession?.status?.toUpperCase();
+
+  const fmt = (v?: number) => (v ?? 0).toLocaleString();
+
+  const lineColumns: Column<any>[] = [
+    { key: 'service_code', label: 'Mã dịch vụ' },
+    { key: 'quantity', label: 'Số lượng' },
+    {
+      key: 'unit_price',
+      label: 'Đơn giá',
+      render: (line) => `${fmt(line.unit_price)} đ`,
+    },
+    {
+      key: 'amount',
+      label: 'Thành tiền',
+      render: (line) => `${fmt(line.amount)} đ`,
+    },
+  ];
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Chi tiết Bảng thanh toán: {payment.code}</h1>
-      <p>Mã Hợp đồng: <strong>{payment.contract_code}</strong></p>
-      <p>Trạng thái: <strong>{payment.status}</strong></p>
-      <p>Trạng thái ký điện tử: <strong>{signingSession?.status || 'none'}</strong></p>
+    <div className="space-y-4">
+      <PageHeader
+        title={`Chi tiết Bảng thanh toán: ${payment.code}`}
+        action={
+          <div className="flex gap-2">
+            {/* Nút Gửi duyệt: Dành cho Kế toán viên, Kế toán trưởng, ADMIN */}
+            {currentStatus === 'DRAFT' && hasRole('ACCOUNTANT', 'ADMIN') && (
+              <button onClick={handleSubmit} className="btn-primary">
+                Gửi duyệt
+              </button>
+            )}
+          </div>
+        }
+      />
 
-      {/* ✅ Nút Gửi duyệt sẽ xuất hiện khi status là DRAFT hoặc Draft */}
-      <div className="flex gap-2 my-4">
-        {currentStatus === 'DRAFT' && (
-          <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Gửi duyệt
-          </button>
-        )}
-        {signStatus === 'FAILED' && (
-          <button onClick={handleResign} className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
-            Gửi ký lại
-          </button>
-        )}
+      {errorMsg && <ErrorBox message={errorMsg} />}
+
+      <div className="card grid grid-cols-3 gap-3 p-4 text-sm">
+        <div><b>Khách hàng:</b> {payment.customer_code}</div>
+        <div><b>Hợp đồng:</b> {payment.contract_code}</div>
+        <div><b>Kỳ:</b> {payment.period}</div>
+        <div className="flex items-center gap-2">
+          <b>Trạng thái:</b> <StatusBadge status={payment.status} />
+        </div>
+        <div className="flex items-center gap-2">
+          <b>Trạng thái ký điện tử:</b>{' '}
+          <StatusBadge status={signingSession?.status || 'none'} />
+        </div>
       </div>
 
-      <h2 className="text-lg font-bold mt-4">Dòng dịch vụ (Lines)</h2>
-      <table className="w-full border-collapse border bg-white">
-        <thead>
-          <tr className="bg-gray-100 border-b">
-            <th className="p-2 border">Mã dịch vụ</th>
-            <th className="p-2 border">Số lượng</th>
-            <th className="p-2 border">Đơn giá</th>
-            <th className="p-2 border">Thành tiền</th>
-          </tr>
-        </thead>
-        <tbody>
-          {payment.lines?.map((line, idx) => (
-            <tr key={idx} className="border-b text-center">
-              <td className="p-2 border">{line.service_code}</td>
-              <td className="p-2 border">{line.quantity}</td>
-              <td className="p-2 border">{line.unit_price.toLocaleString()}</td>
-              <td className="p-2 border">{line.amount.toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="text-right space-y-1">
-        <p>Tạm tính: {payment.subtotal.toLocaleString()} VNĐ</p>
-        <p>Thuế: {payment.tax.toLocaleString()} VNĐ</p>
-        <p className="font-bold text-lg">Tổng cộng: {payment.total.toLocaleString()} VNĐ</p>
+      {id && (
+        <div className="card p-4">
+          <h2 className="mb-3 text-base font-semibold text-primary">
+            Tiến trình phê duyệt
+          </h2>
+          <ApprovalTimeline docType="PAYMENT" docId={id} />
+        </div>
+      )}
+
+      <div>
+        <h2 className="mb-2 text-base font-semibold">Dòng dịch vụ (Lines)</h2>
+        <DataTable
+          columns={lineColumns}
+          rows={payment.lines || []}
+          empty="Không có dòng dịch vụ"
+        />
+        <div className="card mt-2 p-3 text-right text-sm">
+          <div>Tạm tính: <b>{fmt(payment.subtotal)} đ</b></div>
+          <div>Thuế: {fmt(payment.tax)} đ</div>
+          <div className="text-base font-bold text-primary">
+            Tổng cộng: {fmt(payment.total)} đ
+          </div>
+        </div>
       </div>
     </div>
   );

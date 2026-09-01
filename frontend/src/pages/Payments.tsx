@@ -1,101 +1,214 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api, errMsg } from '../api/client';
-import { Payment } from '../types/payment';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { api, errMsg } from "../api/client";
+import { Payment } from "../types/payment";
+import { useAuth } from "../context/AuthContext";
+import PageHeader from "../components/PageHeader";
+import DataTable, { Column } from "../components/DataTable";
+import Modal from "../components/Modal";
+import FormField from "../components/FormField";
+import { ErrorBox, Spinner } from "../components/Feedback";
+import StatusBadge from "../components/StatusBadge";
 
 export const Payments: React.FC = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [customerCode, setCustomerCode] = useState('');
-  const [contractCode, setContractCode] = useState(''); //
-  const [period, setPeriod] = useState('');
+  const [customerCode, setCustomerCode] = useState("");
+  const [contractCode, setContractCode] = useState("");
+  const [period, setPeriod] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
+
+  // Kiểm tra quyền xem danh sách bảng thanh toán
+  const canView = hasRole("ACCOUNTANT", "SALES_MANAGER", "DIRECTOR", "ADMIN");
 
   const fetchPayments = async () => {
-    try {
-      const data = await api.get<Payment[]>('/payments');
-      setPayments(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchPayments();
-  }, []);
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
     setLoading(true);
     try {
-      const idempotencyKey = `pay-gen-${customerCode}-${period}-${Date.now()}`;
-      // ✅ Gửi bổ sung contract_code lên Backend
-      await api.post('/payments/generate', { 
-        customer_code: customerCode, 
-        contract_code: contractCode,
-        period 
-      }, idempotencyKey);
-      
-      alert('Tạo bảng thanh toán thành công!');
-      fetchPayments();
+      setErrorMsg(null);
+      const data = await api.get<Payment[]>("/payments");
+      setPayments(data || []);
     } catch (err) {
-      alert(`Lỗi: ${errMsg(err)}`);
+      console.error(err);
+      setErrorMsg(errMsg(err));
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Bảng thanh toán</h1>
+  useEffect(() => {
+    if (canView) {
+      fetchPayments();
+    }
+  }, [canView]);
 
-      <form onSubmit={handleGenerate} className="flex gap-2 mb-6">
-        <input 
-          className="border p-2 rounded" 
-          placeholder="Mã KH (vd: KH0001)" 
-          value={customerCode} 
-          onChange={e => setCustomerCode(e.target.value)} 
-          required 
-        />
-        {/* ✅ Bổ sung Input Mã hợp đồng */}
-        <input 
-          className="border p-2 rounded" 
-          placeholder="Mã HĐ (vd: HD2026001)" 
-          value={contractCode} 
-          onChange={e => setContractCode(e.target.value)} 
-          required 
-        />
-        <input 
-          className="border p-2 rounded" 
-          placeholder="Kỳ (YYYY-MM)" 
-          value={period} 
-          onChange={e => setPeriod(e.target.value)} 
-          required 
-        />
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="bg-green-600 text-white px-4 py-2 rounded disabled:bg-gray-400"
-        >
-          {loading ? 'Đang tạo...' : 'Tạo bảng thanh toán'}
-        </button>
-      </form>
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setErrorMsg(null);
 
-      <div className="space-y-2">
-        {payments.map(p => (
-          <div key={p.id} className="border p-4 rounded flex justify-between items-center">
-            <div>
-              <p className="font-bold">{p.code} - Mã KH: {p.customer_code} (HĐ: {p.contract_code})</p>
-              <p className="text-sm text-gray-600">
-                Tổng tiền: {p.total.toLocaleString()} VNĐ (Thành tiền: {p.subtotal.toLocaleString()} | Thuế: {p.tax.toLocaleString()}) | Trạng thái: {p.status}
-              </p>
-            </div>
-            <button onClick={() => navigate(`/payments/${p.id}`)} className="bg-blue-600 text-white px-3 py-1 rounded">
-              Xem chi tiết
-            </button>
-          </div>
-        ))}
+    try {
+      const idempotencyKey = `pay-gen-${customerCode}-${period}-${Date.now()}`;
+      await api.post(
+        "/payments/generate",
+        {
+          customer_code: customerCode,
+          contract_code: contractCode,
+          period,
+        },
+        idempotencyKey
+      );
+
+      setOpenModal(false);
+      setCustomerCode("");
+      setContractCode("");
+      setPeriod("");
+      fetchPayments();
+    } catch (err) {
+      setErrorMsg(errMsg(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Nếu không có quyền truy cập trang
+  if (!canView) {
+    return (
+      <div className="p-4">
+        <ErrorBox message="Bạn không có quyền truy cập trang Bảng thanh toán." />
       </div>
+    );
+  }
+
+  const columns: Column<Payment>[] = [
+    {
+      key: "code",
+      label: "Mã bảng thanh toán",
+      render: (p) => <span className="font-semibold">{p.code}</span>,
+    },
+    { key: "customer_code", label: "Mã KH" },
+    { key: "contract_code", label: "Mã HĐ" },
+    { key: "period", label: "Kỳ" },
+    {
+      key: "total",
+      label: "Tổng tiền",
+      render: (p) => (
+        <span className="font-medium">
+          {p.total?.toLocaleString()} đ
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Trạng thái",
+      render: (p) => <StatusBadge status={p.status} />,
+    },
+    {
+      key: "actions",
+      label: "Thao tác",
+      render: (p) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/payments/${p.id}`);
+          }}
+          className="btn-secondary text-xs"
+        >
+          Xem chi tiết
+        </button>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <PageHeader
+        title="Bảng thanh toán"
+        action={
+          /* Nút Tạo bảng thanh toán: Dành cho Kế toán viên, Kế toán trưởng, Quản lý, ADMIN */
+          hasRole("ACCOUNTANT", "CHIEF_ACCOUNTANT", "MANAGER", "ADMIN") ? (
+            <button
+              onClick={() => {
+                setErrorMsg(null);
+                setOpenModal(true);
+              }}
+              className="btn-primary"
+            >
+              Tạo bảng thanh toán
+            </button>
+          ) : undefined
+        }
+      />
+
+      {errorMsg && <ErrorBox message={errorMsg} />}
+
+      {loading ? (
+        <Spinner />
+      ) : (
+        <DataTable
+          columns={columns}
+          rows={payments}
+          empty="Chưa có dữ liệu bảng thanh toán"
+          onRowClick={(p) => navigate(`/payments/${p.id}`)}
+        />
+      )}
+
+      <Modal
+        open={openModal}
+        title="Tạo bảng thanh toán mới"
+        onClose={() => setOpenModal(false)}
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setOpenModal(false)}
+              className="btn-secondary"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              form="generate-payment-form"
+              disabled={submitting}
+              className="btn-primary"
+            >
+              {submitting ? "Đang tạo…" : "Tạo mới"}
+            </button>
+          </>
+        }
+      >
+        <form
+          id="generate-payment-form"
+          onSubmit={handleGenerate}
+          className="space-y-3"
+        >
+          <FormField
+            label="Mã Khách hàng"
+            placeholder="vd: KH0001"
+            value={customerCode}
+            onChange={setCustomerCode}
+            required
+          />
+          <FormField
+            label="Mã Hợp đồng"
+            placeholder="vd: HD2026001"
+            value={contractCode}
+            onChange={setContractCode}
+            required
+          />
+          <FormField
+            label="Kỳ thanh toán"
+            placeholder="2026-03"
+            value={period}
+            onChange={setPeriod}
+            required
+          />
+        </form>
+      </Modal>
     </div>
   );
 };

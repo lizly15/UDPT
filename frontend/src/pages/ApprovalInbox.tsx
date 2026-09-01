@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { api, errMsg } from '../api/client';
 import { Task } from '../types/workflow';
+import PageHeader from '../components/PageHeader';
+import StatusBadge from '../components/StatusBadge';
+import { ErrorBox, Spinner } from '../components/Feedback';
+import { useAuth } from '../context/AuthContext';
 
 export const ApprovalInbox: React.FC = () => {
+  const { hasRole } = useAuth();
+  
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -16,6 +22,7 @@ export const ApprovalInbox: React.FC = () => {
       setTasks(data || []);
     } catch (err: any) {
       console.error(err);
+      setErrorMsg(errMsg(err));
     } finally {
       setLoading(false);
     }
@@ -35,11 +42,14 @@ export const ApprovalInbox: React.FC = () => {
     try {
       const idempotencyKey = `task-action-${selectedTask.id}-${Date.now()}`;
       
-      // Thử gọi endpoint chuẩn dạng RESTful action
-      // 1. Nếu Backend hỗ trợ /tasks/{id}/action:
+      let actionEndpoint = action as string;
+      if (action === 'request_revision') {
+        actionEndpoint = 'request-revision';
+      }
+
       await api.post(
-        `/tasks/${selectedTask.id}/action`,
-        { action: action.toLowerCase(), comment },
+        `/tasks/${selectedTask.id}/${actionEndpoint}`,
+        { comment },
         idempotencyKey
       );
 
@@ -48,100 +58,148 @@ export const ApprovalInbox: React.FC = () => {
       setErrorMsg('');
       fetchTasks();
     } catch (err: any) {
-      console.error('Action error:', err);
-      
-      // Fallback: Thử lại với endpoint trực tiếp /tasks/{id}/{action} nếu endpoint trên trả 404
-      if (err?.status === 404) {
-        try {
-          const idempotencyKey = `task-action-${selectedTask.id}-${Date.now()}`;
-          await api.post(
-            `/tasks/${selectedTask.id}/${action}`,
-            { comment },
-            idempotencyKey
-          );
-
-          setSelectedTask(null);
-          setComment('');
-          setErrorMsg('');
-          fetchTasks();
-          return;
-        } catch (fallbackErr: any) {
-          setErrorMsg(errMsg(fallbackErr));
-          return;
-        }
-      }
-
       setErrorMsg(errMsg(err));
     }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Approval Inbox</h1>
+    <div className="space-y-4">
+      <PageHeader title="Hộp thư phê duyệt (Approval Inbox)" />
+      
+      {errorMsg && !selectedTask && <ErrorBox message={errorMsg} />}
+
       {loading ? (
-        <div>Đang tải...</div>
+        <Spinner />
       ) : (
-        <div className="space-y-4">
-          {tasks.map((task) => (
-            <div key={task.id} className="border p-4 rounded shadow-sm flex justify-between items-center bg-white">
-              <div>
-                <p className="font-semibold">Bước {task.step_order}: {task.step_name}</p>
-                <p className="text-sm text-gray-600">
-                  Vai trò: {task.assignee_role} | Người phân công: {task.assignee_username}
-                </p>
-                <p className="text-xs text-gray-500">Trạng thái: {task.status}</p>
-              </div>
-              <button
-                onClick={() => { setSelectedTask(task); setErrorMsg(''); }}
-                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+        <div className="space-y-3">
+          {tasks.map((task) => {
+            const canProcess = hasRole(task.assignee_role, 'ADMIN');
+
+            return (
+              <div 
+                key={task.id} 
+                className="card flex items-center justify-between p-4 transition-all hover:shadow-md border border-gray-100"
               >
-                Xử lý
-              </button>
+                <div className="space-y-1">
+                  <p className="font-semibold text-gray-900">
+                    Bước {task.step_order}: {task.step_name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Vai trò: <span className="font-medium text-gray-800">{task.assignee_role}</span> | Người phân công: <span className="font-medium text-gray-800">{task.assignee_username}</span>
+                  </p>
+                  <div className="flex items-center gap-2 pt-1 text-xs">
+                    <span className="text-gray-500">Trạng thái:</span>
+                    <StatusBadge status={task.status} />
+                  </div>
+                </div>
+
+                {canProcess ? (
+                  <button
+                    onClick={() => { setSelectedTask(task); setErrorMsg(''); }}
+                    className="btn-primary text-sm shadow-sm"
+                  >
+                    Xử lý
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-400 italic">Chỉ xem (Không đúng Role)</span>
+                )}
+              </div>
+            );
+          })}
+
+          {tasks.length === 0 && (
+            <div className="card text-center text-gray-500 py-8 italic">
+              Không có tác vụ nào chờ duyệt.
             </div>
-          ))}
-          {tasks.length === 0 && <div>Không có tác vụ nào chờ duyệt.</div>}
+          )}
         </div>
       )}
 
+      {/* MODAL PHÊ DUYỆT ĐƯỢC THIẾT KẾ LẠI */}
       {selectedTask && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 rounded max-w-md w-full shadow-lg">
-            <h2 className="text-lg font-bold mb-2">Duyệt công việc #{selectedTask.id}</h2>
-            <p className="text-sm text-gray-600 mb-4">Bước: {selectedTask.step_name} (Thứ tự: {selectedTask.step_order})</p>
-            {errorMsg && <p className="text-red-500 text-sm mb-2 font-medium">{errorMsg}</p>}
-            <textarea
-              className="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={3}
-              placeholder="Nhập ghi chú / lý do (bắt buộc khi Từ chối / Sửa đổi)..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <div className="flex gap-2 justify-end">
-              <button 
-                onClick={() => setSelectedTask(null)} 
-                className="px-3 py-1 border rounded hover:bg-gray-100"
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl transition-all border border-gray-100">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between bg-gray-50 px-6 py-4 border-b border-gray-100">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Phê duyệt tác vụ #{selectedTask.id}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Bước {selectedTask.step_order}: <span className="font-medium text-gray-700">{selectedTask.step_name}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedTask(null)}
+                className="rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors"
               >
-                Hủy
-              </button>
-              <button 
-                onClick={() => handleAction('request_revision')} 
-                className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-              >
-                Yêu cầu sửa
-              </button>
-              <button 
-                onClick={() => handleAction('reject')} 
-                className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Từ chối
-              </button>
-              <button 
-                onClick={() => handleAction('approve')} 
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Duyệt
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4">
+              {errorMsg && <ErrorBox message={errorMsg} />}
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
+                  Ý kiến / Lý do xử lý
+                </label>
+                <textarea
+                  className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
+                  rows={4}
+                  placeholder="Nhập ghi chú (bắt buộc khi 'Từ chối' hoặc 'Yêu cầu sửa')..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer / Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-gray-50 px-6 py-4 border-t border-gray-100">
+              <button 
+                onClick={() => setSelectedTask(null)} 
+                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200/70 transition-colors"
+              >
+                Đóng
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Nút Yêu cầu sửa - Màu Vàng */}
+                {hasRole(selectedTask.assignee_role, 'ACCOUNTANT', 'DIRECTOR', 'ADMIN') && (
+                  <button 
+                    onClick={() => handleAction('request_revision')} 
+                    className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-600 focus:ring-2 focus:ring-amber-300 transition-all"
+                  >
+                    Yêu cầu sửa
+                  </button>
+                )}
+
+                {/* Nút Từ chối - Màu Đỏ */}
+                {hasRole(selectedTask.assignee_role, 'MANAGER', 'DIRECTOR', 'ADMIN') && (
+                  <button 
+                    onClick={() => handleAction('reject')} 
+                    className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 focus:ring-2 focus:ring-rose-300 transition-all"
+                  >
+                    Từ chối
+                  </button>
+                )}
+
+                {/* Nút Duyệt - Màu Xanh Lá */}
+                {hasRole(selectedTask.assignee_role, 'MANAGER', 'DIRECTOR', 'ADMIN') && (
+                  <button 
+                    onClick={() => handleAction('approve')} 
+                    className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-300 transition-all"
+                  >
+                    Duyệt đơn
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       )}

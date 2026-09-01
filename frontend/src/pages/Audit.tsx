@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { api, errMsg } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import PageHeader from '../components/PageHeader';
+import DataTable, { Column } from '../components/DataTable';
+import { ErrorBox, Spinner } from '../components/Feedback';
 
 export const Audit: React.FC = () => {
   const [docId, setDocId] = useState('');
@@ -8,13 +12,19 @@ export const Audit: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
+  const { hasRole } = useAuth();
+
+  // Kiểm tra quyền truy cập trang Nhật ký hệ thống (Audit Log)
+  const canView = hasRole('ADMIN', 'DIRECTOR','ACCOUNTANT');
+
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (!canView) return;
+
     setLoading(true);
     setErrorMsg('');
     try {
       const params = new URLSearchParams();
-      // Chỉ gửi đúng doc_id lên Backend
       if (docId.trim()) params.append('doc_id', docId.trim());
       if (docType.trim()) params.append('doc_type', docType.trim());
 
@@ -31,10 +41,20 @@ export const Audit: React.FC = () => {
   };
 
   useEffect(() => {
-    handleSearch();
-  }, []);
+    if (canView) {
+      handleSearch();
+    }
+  }, [canView]);
 
-  // Đọc thời gian
+  // Trả về giao diện báo lỗi nếu không đủ quyền truy cập
+  if (!canView) {
+    return (
+      <div className="p-4">
+        <ErrorBox message="Bạn không có quyền truy cập trang Tra cứu Nhật ký hệ thống (Audit Log)." />
+      </div>
+    );
+  }
+
   const renderTime = (log: any) => {
     const rawTime = log.ts || log.created_at || log.timestamp || log.time;
     if (!rawTime) return 'N/A';
@@ -47,12 +67,10 @@ export const Audit: React.FC = () => {
     }
   };
 
-  // Đọc người thực hiện
   const renderActor = (log: any) => {
     return log.actor || log.user_id || log.username || log.performed_by || 'N/A';
   };
 
-  // Đọc loại hồ sơ
   const renderDocType = (log: any) => {
     return (
       log.doc_type ||
@@ -63,85 +81,94 @@ export const Audit: React.FC = () => {
     );
   };
 
-  // Đọc dữ liệu chi tiết
   const getDetails = (log: any) => {
     return log.details || log.payload || log.data || log.changes;
   };
 
+  const columns: Column<any>[] = [
+    {
+      key: 'time',
+      label: 'Thời gian',
+      render: (log) => <span className="font-medium text-blue-700">{renderTime(log)}</span>,
+    },
+    {
+      key: 'actor',
+      label: 'Thực hiện',
+      render: (log) => <span className="font-semibold text-gray-900">{renderActor(log)}</span>,
+    },
+    {
+      key: 'doc_id',
+      label: 'Mã hồ sơ',
+      render: (log) => {
+        const id = log.doc_id || log.doc_code;
+        return id ? (
+          <span className="rounded border bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-700">
+            {id}
+          </span>
+        ) : (
+          'N/A'
+        );
+      },
+    },
+    {
+      key: 'action',
+      label: 'Thao tác',
+      render: (log) => <span className="font-semibold text-emerald-600">{log.action || 'N/A'}</span>,
+    },
+    {
+      key: 'doc_type',
+      label: 'Loại hồ sơ',
+      render: (log) => <span className="font-bold text-indigo-600">{renderDocType(log)}</span>,
+    },
+    {
+      key: 'details',
+      label: 'Chi tiết (Payload)',
+      render: (log) => {
+        const detailsData = getDetails(log);
+        if (!detailsData) return <span className="text-gray-400 italic">Không có</span>;
+        return (
+          <pre className="max-h-32 max-w-xs overflow-auto rounded border bg-gray-50 p-2 text-xs font-mono text-gray-800">
+            {typeof detailsData === 'object'
+              ? JSON.stringify(detailsData, null, 2)
+              : String(detailsData)}
+          </pre>
+        );
+      },
+    },
+  ];
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Tra cứu Audit Log</h1>
-      
-      <form onSubmit={handleSearch} className="flex gap-2 mb-6 max-w-2xl">
+    <div className="space-y-4">
+      <PageHeader title="Tra cứu Audit Log" />
+
+      <form onSubmit={handleSearch} className="card flex max-w-2xl gap-2 p-4">
         <input
-          className="border p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Mã hồ sơ "
+          className="input-field flex-1"
+          placeholder="Mã hồ sơ (doc_id)"
           value={docId}
           onChange={(e) => setDocId(e.target.value)}
         />
         <input
-          className="border p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Loại hồ sơ "
+          className="input-field flex-1"
+          placeholder="Loại hồ sơ (doc_type)"
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
         />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-medium"
-        >
+        <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Đang tìm...' : 'Tìm kiếm'}
         </button>
       </form>
 
-      {errorMsg && <p className="text-red-500 mb-4 font-medium">{errorMsg}</p>}
+      {errorMsg && <ErrorBox message={errorMsg} />}
 
       {loading ? (
-        <div>Đang tải nhật ký...</div>
+        <Spinner />
       ) : (
-        <div className="space-y-3">
-          {logs.map((log, index) => {
-            const detailsData = getDetails(log);
-            const currentDocId = log.doc_id || log.doc_code;
-            return (
-              <div key={log.id || index} className="border p-4 rounded bg-white shadow-sm text-sm">
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-gray-700">
-                    <strong>Thời gian:</strong> <span className="text-blue-700 font-medium">{renderTime(log)}</span> |{' '}
-                    <strong>Thực hiện:</strong> <span className="font-semibold text-gray-900">{renderActor(log)}</span>
-                  </p>
-                  {currentDocId && (
-                    <span className="text-xs bg-gray-100 text-gray-700 font-mono px-2 py-0.5 rounded border">
-                      ID: {currentDocId}
-                    </span>
-                  )}
-                </div>
-
-                <p className="mb-2">
-                  <strong>Thao tác:</strong>{' '}
-                  <span className="font-semibold text-emerald-600">{log.action || 'N/A'}</span> trên loại hồ sơ{' '}
-                  <strong className="text-indigo-600 font-bold">{renderDocType(log)}</strong>
-                </p>
-
-                {detailsData && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-500 mb-1 font-medium">Chi tiết dữ liệu (Payload):</p>
-                    <pre className="bg-gray-50 p-2 border rounded text-xs font-mono overflow-x-auto text-gray-800">
-                      {typeof detailsData === 'object'
-                        ? JSON.stringify(detailsData, null, 2)
-                        : String(detailsData)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {!loading && logs.length === 0 && (
-            <div className="text-gray-500 italic p-4 bg-gray-50 rounded border">
-              Không tìm thấy bản ghi Audit Log nào.
-            </div>
-          )}
-        </div>
+        <DataTable
+          columns={columns}
+          rows={logs}
+          empty="Không tìm thấy bản ghi Audit Log nào."
+        />
       )}
     </div>
   );
