@@ -9,6 +9,7 @@ help:
 	@echo "  make ps      - Trạng thái container"
 	@echo "  make seed    - Nạp dữ liệu mẫu (Data sample.pdf)"
 	@echo "  make smoke   - Chạy smoke-test SC-01..SC-10"
+	@echo "  make test    - Chạy unit test (pytest) trong container"
 	@echo "  make clean   - Down + xóa volume dữ liệu"
 
 up:
@@ -32,6 +33,12 @@ seed:
 
 smoke:
 	bash scripts/smoke-test.sh
+
+test:
+	docker run --rm -v "$(PWD)/services":/app -w /app python:3.12-slim sh -c \
+	  "pip install -q -r requirements-test.txt && \
+	   for s in contract-service pricing-service workflow-service billing-service; do \
+	     echo \"== $$s ==\"; python -m pytest $$s/tests -q -p no:cacheprovider || exit 1; done"
 
 clean:
 	docker compose down -v
