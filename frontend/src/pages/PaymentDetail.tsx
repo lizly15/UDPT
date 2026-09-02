@@ -53,6 +53,18 @@ export const PaymentDetail: React.FC = () => {
     }
   };
 
+  // Gửi ký lại khi ký điện tử thất bại (SC-06)
+  const handleRetrySign = async () => {
+    try {
+      setErrorMsg(null);
+      const idempotencyKey = `pay-retry-${id}-${Date.now()}`;
+      await api.post(`/workflows/esign/${id}/retry`, {}, idempotencyKey);
+      fetchDetail();
+    } catch (err) {
+      setErrorMsg(errMsg(err));
+    }
+  };
+
 
 
   // Nếu không có quyền xem trang
@@ -97,6 +109,13 @@ export const PaymentDetail: React.FC = () => {
                 Gửi duyệt
               </button>
             )}
+            {/* Nút Gửi ký lại: chỉ hiện khi ký điện tử thất bại (SC-06) */}
+            {signingSession?.status?.toLowerCase() === 'failed' &&
+              hasRole('ACCOUNTANT', 'ADMIN') && (
+                <button onClick={handleRetrySign} className="btn-secondary">
+                  Gửi ký lại
+                </button>
+              )}
           </div>
         }
       />
