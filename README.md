@@ -33,13 +33,15 @@ cp .env.example .env
 make up          # build & chạy toàn bộ
 make ps          # kiểm tra trạng thái
 ```
+- Giao diện web (frontend): http://localhost:3000
 - API Gateway: http://localhost:8080
 - Swagger mỗi service: http://localhost:<port>/docs
 - Kafka UI: http://localhost:8085
 
 ```bash
 make seed        # nạp dữ liệu mẫu (sau khi hệ thống UP)
-make smoke       # chạy kịch bản SC-01..SC-10
+make smoke       # chạy kịch bản SC-01..SC-10 (end-to-end)
+make test        # chạy unit test (pytest) trong container
 make logs SVC=contract-service
 make down        # dừng   |   make clean = dừng + xóa dữ liệu
 ```
