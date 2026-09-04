@@ -45,8 +45,13 @@ clean:
 
 report:
 	docker run --rm -v "$(PWD)/report":/data pandoc/core report.md -o report.html \
-	  --standalone --embed-resources --css style.css --metadata title="Báo cáo Đồ án UDPT"
+	  --standalone --embed-resources --css style.css --metadata pagetitle="Báo cáo Đồ án UDPT"
 	@echo "Đã tạo report/report.html. Mở bằng trình duyệt rồi In -> Lưu PDF để có report.pdf."
+
+slides:
+	docker run --rm -v "$(PWD)":/data -w /data python:3.12-slim sh -c \
+	  "pip install -q python-pptx pillow && python scripts/make_slides.py"
+	@echo "Đã tạo report/slides.pptx (mở & chỉnh bằng PowerPoint)."
 
 package:
 	@zip -r "DATH_UDPT_$(shell date +%Y%m%d).zip" . \
