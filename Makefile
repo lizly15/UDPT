@@ -36,9 +36,9 @@ smoke:
 
 test:
 	docker run --rm -v "$(PWD)/services":/app -w /app python:3.12-slim sh -c \
-	  "pip install -q -r requirements-test.txt && \
+	  'pip install -q -r requirements-test.txt && \
 	   for s in contract-service pricing-service workflow-service billing-service; do \
-	     echo \"== $$s ==\"; python -m pytest $$s/tests -q -p no:cacheprovider || exit 1; done"
+	     echo "== $$s =="; python -m pytest $$s/tests -q -p no:cacheprovider || exit 1; done'
 
 clean:
 	docker compose down -v
