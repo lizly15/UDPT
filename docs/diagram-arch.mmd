@@ -1,0 +1,34 @@
+flowchart TB
+  UI["Web Client React / Swagger"]
+  GW["API Gateway :8080<br/>verify JWT · rate-limit · idempotency · Redis"]
+  UI -->|"HTTPS + JWT"| GW
+
+  subgraph SVC["Microservices nghiệp vụ — mỗi service 1 DB PostgreSQL riêng"]
+    direction LR
+    ID["identity"]
+    CUS["customer"]
+    CON["contract"]
+    PRI["pricing"]
+    BIL["billing"]
+    WF["workflow"]
+    NOT["notification"]
+  end
+  GW --> ID & CUS & CON & PRI & BIL & WF & NOT
+
+  ES["mock-esign"]
+  K(("Kafka + Outbox"))
+
+  CON -. "REST submit" .-> WF
+  PRI -. "REST submit" .-> WF
+  BIL -. "REST: HĐ + giá" .-> CON
+  BIL -. "REST: HĐ + giá" .-> PRI
+  WF -. "HTTP ký" .-> ES
+  ES -. "callback" .-> WF
+
+  CON & PRI & BIL & WF ==>|"phát event (Outbox)"| K
+  K ==>|"consume"| NOT & WF & BIL
+
+  classDef edge fill:#1f4e79,color:#fff;
+  classDef infra fill:#dbeafe,color:#1e293b;
+  class GW edge
+  class K,ES infra
