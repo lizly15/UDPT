@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor ACC as Kế toán
+  participant BIL as billing
+  participant CON as contract
+  participant PRI as pricing
+  participant WF as workflow
+  participant ES as mock-esign
+  participant K as Kafka
+  ACC->>BIL: POST /payments/generate
+  BIL->>CON: GET /contracts/{id} (kiểm hiệu lực - PAY-01)
+  BIL->>PRI: GET /pricing/effective (copy đơn giá - PAY-03)
+  ACC->>BIL: submit → workflow (PAYMENT)
+  ACC->>WF: duyệt các cấp
+  WF->>WF: cấp cuối approve → tự khởi động ký
+  WF->>ES: POST /sign (bất đồng bộ)
+  ES-->>WF: callback signed
+  WF-->>K: esign.events: Signed
+  K-->>BIL: Signed → Payment = Issued

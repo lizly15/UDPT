@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor U as Kinh doanh
+  participant CON as contract
+  participant WF as workflow
+  participant K as Kafka
+  participant NOT as notification
+  U->>CON: POST /contracts/{id}/submit
+  CON->>WF: POST /workflows/instances (CONTRACT)
+  WF-->>CON: instance_id (Submitted)
+  WF-->>K: StepAssigned (Outbox)
+  K-->>NOT: thông báo người duyệt
+  loop Mỗi cấp duyệt
+    U->>WF: POST /tasks/{id}/approve
+    WF-->>K: StepAssigned / DocApproved
+  end
+  K-->>CON: DocApproved → Contract = Approved
+  K-->>NOT: thông báo người gửi
+  U->>CON: activate → Active
