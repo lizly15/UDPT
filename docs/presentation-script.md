@@ -123,8 +123,8 @@ Cuối cùng là hai chức năng xuyên suốt: thông báo tự động khi c�
 
 ---
 
-## PHẦN 3 — VŨ HUYỀN THIÊN LÝ (Slide 37–51, ~5 phút, kết thúc)
-*Bài toán phân tán, triển khai, kiểm thử, phân công và kết luận.*
+## PHẦN 3 — VŨ HUYỀN THIÊN LÝ (Slide 37–50, ~5 phút, kết thúc)
+*Bài toán phân tán, triển khai, kiểm thử và kết luận.*
 
 **[Slide 37 — Divider 08: Xử lý bài toán phân tán]**
 Cảm ơn Long. Em là Thiên Lý. Phần của em sẽ đi sâu vào những bài toán khó nhất của một hệ phân tán mà nhóm đã xử lý, sau đó là triển khai, kiểm thử, và kết luận.
@@ -156,19 +156,16 @@ Mức thứ hai là unit test cho các business rule và state machine — tức
 **[Slide 46 — Bao phủ yêu cầu]**
 Tổng kết phần kiểm thử: nhóm em đã bao phủ đầy đủ mọi khía cạnh của đề bài — toàn bộ chức năng 4.1 đến 4.10 đều có minh chứng giao diện; các business rule được enforce ở service; mười kịch bản đều pass; và tất cả yêu cầu kỹ thuật ở mục 6, từ microservices, Gateway, đến Kubernetes và JWT, đều được đáp ứng.
 
-**[Slide 47 — Divider 11: Phân công & Kết luận]**
-*Chuyển tiếp.* Cuối cùng, em xin nói về phân công công việc và kết luận.
+**[Slide 47 — Divider 11: Kết luận]**
+*Chuyển tiếp.* Cuối cùng, em xin tổng kết lại toàn bộ đồ án.
 
-**[Slide 48 — Phân công công việc]**
-Về phân công: em — Thiên Lý — phụ trách kiến trúc và phần lớn backend, cùng phần báo cáo và slide, đóng góp khoảng 35%. Bạn Kiệt và bạn Long phụ trách frontend, mỗi bạn 25%. Bạn Hoàng Danh phụ trách một phần backend, khoảng 15%. Cả nhóm đã phối hợp qua Git với quy trình review chéo.
-
-**[Slide 49 — Kết luận]**
+**[Slide 48 — Kết luận]**
 Để kết luận: nhóm em đã hiện thực đầy đủ nghiệp vụ quản trị kinh doanh trên một kiến trúc microservices hoàn chỉnh; giải quyết trọn vẹn các bài toán phân tán trọng tâm như Outbox, idempotency, optimistic locking, phân quyền theo ngữ cảnh và ký điện tử bất đồng bộ; triển khai thành công trên cả Docker Compose và Kubernetes; và kiểm chứng bằng bộ test tự động với 14 trên 14 kịch bản cùng 31 unit test đều đạt.
 
-**[Slide 50 — Hướng phát triển]**
+**[Slide 49 — Hướng phát triển]**
 Trong tương lai, nếu phát triển tiếp, nhóm em định thay tiến trình Outbox relay bằng CDC với Debezium để hiệu quả hơn; thêm distributed tracing với OpenTelemetry để quan sát luồng xuyên service; bổ sung auto-scaling và lưu trữ bền trên Kubernetes; và tích hợp một dịch vụ ký điện tử thật thay cho bản giả lập.
 
-**[Slide 51 — Cảm ơn]**
+**[Slide 50 — Cảm ơn]**
 Đó là toàn bộ phần trình bày của nhóm em. Toàn bộ mã nguồn nhóm em đã công khai trên GitHub theo đường link trên màn hình, thầy và các bạn có thể tải về chạy thử. Thay mặt nhóm, em xin chân thành cảm ơn thầy và các bạn đã lắng nghe. Nhóm em rất sẵn lòng nhận các câu hỏi của thầy và các bạn ạ.
 
 ---
@@ -178,7 +175,7 @@ Trong tương lai, nếu phát triển tiếp, nhóm em định thay tiến trì
 |---|---|---|
 | Kiệt (mở đầu) | 1–19 | ~5 phút |
 | Long | 20–36 | ~5 phút |
-| Lý (kết thúc) | 37–51 | ~5 phút |
+| Lý (kết thúc) | 37–50 | ~5 phút |
 
 ### Mẹo trình bày
 - Slide chia phần (divider) chỉ nói 1 câu chuyển ý rồi qua nhanh, không dừng lâu.

@@ -536,13 +536,7 @@ content("Bao phủ yêu cầu (truy vết)", [
 ], kicker="Phần 10 · Truy vết")
 
 # --- Phần 11 ---
-divider("11", "Phân công & Kết luận", "Đóng góp và hướng phát triển")
-table_slide("Phân công công việc", ["Thành viên", "%", "Công việc"], [
-    ["Vũ Huyền Thiên Lý", "35%", "Kiến trúc; Gateway, Identity, Contract, Pricing, Workflow, Notification; hạ tầng, kiểm thử, báo cáo/slide"],
-    ["Nguyễn Tuấn Kiệt", "25%", "Frontend: khung + Khách hàng, Dịch vụ, Hợp đồng, Bảng giá"],
-    ["Nguyễn Thế Thanh Long", "25%", "Frontend: Sản lượng, Thanh toán, Phê duyệt, Thông báo, Nhật ký, Quản trị"],
-    ["Nguyễn Hoàng Danh", "15%", "Backend: Customer, Billing, Mock e-sign"],
-], kicker="Phần 11 · Phân công", col_w=[2.9, 0.8, 8.2])
+divider("11", "Kết luận", "Tổng kết và hướng phát triển")
 content("Kết luận", [
     "Hiện thực đầy đủ nghiệp vụ quản trị kinh doanh trên kiến trúc microservices",
     "Giải quyết trọn các bài toán phân tán: Outbox, idempotency, optimistic lock, "
