@@ -1,0 +1,108 @@
+erDiagram
+  USER ||--o{ USER_ROLE : "có"
+  ROLE ||--o{ USER_ROLE : "gán"
+  CUSTOMER ||--o{ CONTRACT : "ký"
+  CUSTOMER ||--o{ PRICE_LIST : "áp dụng"
+  CONTRACT ||--o{ CONTRACT_APPENDIX : "có phụ lục"
+  CONTRACT ||--o{ PAYMENT_STATEMENT : "phát sinh"
+  PRICE_LIST ||--o{ PRICE_LIST_VERSION : "gồm version"
+  PRICE_LIST_VERSION ||--o{ PRICE_ITEM : "gồm dòng giá"
+  PAYMENT_STATEMENT ||--o{ PAYMENT_LINE : "gồm dòng"
+  WORKFLOW_DEFINITION ||--o{ WORKFLOW_STEP_DEF : "gồm bước"
+  WORKFLOW_INSTANCE ||--o{ WORKFLOW_TASK : "sinh task"
+
+  USER {
+    string id PK
+    string username
+    string full_name
+    string department
+    bool is_active
+  }
+  ROLE {
+    string code PK
+    string name
+  }
+  CUSTOMER {
+    string code PK
+    string name
+    string tax_code
+    string customer_type
+    string status
+  }
+  CONTRACT {
+    string code PK
+    string customer_code FK
+    date effective_from
+    date effective_to
+    numeric value
+    string status
+    string workflow_instance_id
+  }
+  CONTRACT_APPENDIX {
+    string id PK
+    string contract_code FK
+    date effective_date
+    string status
+  }
+  PRICE_LIST {
+    string code PK
+    string customer_code FK
+    string name
+  }
+  PRICE_LIST_VERSION {
+    string id PK
+    string price_list_code FK
+    int version_no
+    date effective_from
+    date effective_to
+    string status
+  }
+  PRICE_ITEM {
+    string id PK
+    string version_id FK
+    string service_code
+    numeric unit_price
+  }
+  PAYMENT_STATEMENT {
+    string id PK
+    string code
+    string customer_code
+    string contract_code
+    string period
+    numeric total
+    string status
+  }
+  PAYMENT_LINE {
+    string id PK
+    string statement_id FK
+    string service_code
+    numeric quantity
+    numeric unit_price
+    numeric amount
+  }
+  WORKFLOW_DEFINITION {
+    string doc_type PK
+    string name
+  }
+  WORKFLOW_STEP_DEF {
+    string id PK
+    string doc_type FK
+    int step_order
+    string assignee_role
+    string assignee_username
+  }
+  WORKFLOW_INSTANCE {
+    string id PK
+    string doc_type
+    string doc_id
+    string status
+    int current_step_order
+    int version_id
+  }
+  WORKFLOW_TASK {
+    string id PK
+    string instance_id FK
+    int step_order
+    string assignee_username
+    string status
+  }
