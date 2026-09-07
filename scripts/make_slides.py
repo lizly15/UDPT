@@ -153,9 +153,8 @@ def title_slide():
     para(tf, "Nhóm thực hiện", 15, ACCENT, bold=True, align=PP_ALIGN.CENTER, first=True)
     for name in [
         "Vũ Huyền Thiên Lý — 21126028   (35%)",
-        "Nguyễn Tuấn Kiệt — 21126027   (25%)",
-        "Nguyễn Thế Thanh Long — 22127247   (25%)",
-        "Nguyễn Hoàng Danh — 21126057   (15%)",
+        "Nguyễn Tuấn Kiệt — 21126027   (30%)",
+        "Nguyễn Thế Thanh Long — 22127247   (35%)",
     ]:
         para(tf, name, 16, INK, align=PP_ALIGN.CENTER, space=4)
     para(tf, "GVHD: Nguyễn Trường Sơn · Phạm Minh Tú", 13, GRAY, italic=True,
