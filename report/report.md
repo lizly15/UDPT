@@ -10,7 +10,6 @@
   <td><b><i>Sinh viên thực hiện:</i></b><br/>
   Vũ Huyền Thiên Lý (21126028)<br/>
   Nguyễn Tuấn Kiệt (21126027)<br/>
-  Nguyễn Hoàng Danh (21126057)<br/>
   Nguyễn Thế Thanh Long (22127247)</td>
   <td><b><i>Giáo viên hướng dẫn:</i></b><br/>
   Nguyễn Trường Sơn<br/>
@@ -29,9 +28,8 @@
 </thead>
 <tbody>
 <tr><td>21126028</td><td style="white-space:nowrap">Vũ Huyền Thiên Lý</td><td style="text-align:center">35%</td><td>Kiến trúc; Gateway, Identity, Contract, Pricing, Workflow, Notification; hạ tầng &amp; kiểm thử; báo cáo &amp; slide</td></tr>
-<tr><td>21126057</td><td style="white-space:nowrap">Nguyễn Hoàng Danh</td><td style="text-align:center">15%</td><td>Backend: Customer, Billing, Mock e-sign</td></tr>
-<tr><td>21126027</td><td style="white-space:nowrap">Nguyễn Tuấn Kiệt</td><td style="text-align:center">25%</td><td>Frontend: khung ứng dụng + Khách hàng, Dịch vụ, Hợp đồng, Bảng giá</td></tr>
-<tr><td>22127247</td><td style="white-space:nowrap">Nguyễn Thế Thanh Long</td><td style="text-align:center">25%</td><td>Frontend: Sản lượng, Thanh toán, Phê duyệt, Thông báo, Nhật ký, Quản trị</td></tr>
+<tr><td>21126027</td><td style="white-space:nowrap">Nguyễn Tuấn Kiệt</td><td style="text-align:center">30%</td><td>Frontend: khung ứng dụng + Khách hàng, Dịch vụ, Hợp đồng, Bảng giá</td></tr>
+<tr><td>22127247</td><td style="white-space:nowrap">Nguyễn Thế Thanh Long</td><td style="text-align:center">35%</td><td>Frontend: Sản lượng, Thanh toán, Phê duyệt, Thông báo, Nhật ký, Quản trị · Backend: Customer, Billing, Mock e-sign</td></tr>
 </tbody>
 </table>
 
@@ -267,26 +265,23 @@ Hợp đồng (CTR-01..07), Bảng giá (PRC-01..06), Bảng thanh toán (PAY-01
 - **Kiểm thử & dữ liệu**: seed dữ liệu mẫu A.1–A.8, smoke-test SC-01..10, unit test (pytest).
 - **Báo cáo & slide thuyết trình.**
 
-**Nguyễn Hoàng Danh (21126057) — 15% — Backend:**
-
-- **Customer service**: quản lý khách hàng + danh mục dịch vụ.
-- **Billing service**: ghi nhận sản lượng & khóa kỳ; lập bảng thanh toán + quản lý trạng thái (PAY-01..07).
-- **Mock e-sign service**: dịch vụ ký điện tử giả lập, callback bất đồng bộ.
-
-**Nguyễn Tuấn Kiệt (21126027) — 25% — Frontend (khung + nghiệp vụ Kinh doanh):**
+**Nguyễn Tuấn Kiệt (21126027) — 30% — Frontend (khung + nghiệp vụ Kinh doanh):**
 
 - Khung ứng dụng React: định tuyến, xác thực, layout, API client (tự refresh token), bộ component dùng chung (bảng dữ liệu, modal, form, badge trạng thái, timeline duyệt).
 - Màn **Khách hàng**; màn **Danh mục dịch vụ**.
 - Màn **Hợp đồng**: danh sách + bộ lọc + tạo mới; chi tiết + phụ lục + tiến trình duyệt.
 - Màn **Bảng giá**: danh sách version, tạo version, gửi duyệt, tra giá hiệu lực.
 
-**Nguyễn Thế Thanh Long (22127247) — 25% — Frontend (Vận hành, Tài chính, Phê duyệt):**
+**Nguyễn Thế Thanh Long (22127247) — 35% — Frontend (Vận hành, Tài chính, Phê duyệt) + một phần Backend:**
 
 - Màn **Sản lượng**: nhập sản lượng + khóa kỳ.
 - Màn **Bảng thanh toán**: danh sách + lập bảng; chi tiết + gửi duyệt + trạng thái ký điện tử + gửi ký lại.
 - Màn **Hộp thư phê duyệt**: duyệt / từ chối / yêu cầu chỉnh sửa.
 - Màn **Thông báo**; màn **Nhật ký truy vết**.
 - Màn **Quản trị**: quản lý người dùng + xem cấu hình quy trình duyệt.
+- **Customer service** (backend): quản lý khách hàng + danh mục dịch vụ.
+- **Billing service** (backend): ghi nhận sản lượng & khóa kỳ; lập bảng thanh toán + trạng thái (PAY-01..07).
+- **Mock e-sign service** (backend): ký điện tử giả lập, callback bất đồng bộ.
 
 ## 14. Kết luận & hướng phát triển
 Hệ thống đã hiện thực đầy đủ nghiệp vụ quản trị kinh doanh trên kiến trúc microservices, giải quyết trọn vẹn các bài toán phân tán trọng tâm (workflow cấu hình, Outbox, idempotency, optimistic locking, phân quyền ngữ cảnh, ký điện tử bất đồng bộ), triển khai thành công trên cả Docker Compose và Kubernetes, và được kiểm chứng bằng bộ test tự động (14/14 smoke + 31/31 unit).

@@ -9,7 +9,7 @@ Ghi chú: câu *in nghiêng* là hành động/chuyển slide; phần còn lại
 *Mở đầu: giới thiệu, bài toán, kiến trúc, dữ liệu, cơ chế giao tiếp phân tán.*
 
 **[Slide 1 — Trang bìa]**
-Em xin kính chào thầy và các bạn. Nhóm em gồm 4 thành viên, hôm nay xin trình bày đồ án môn Ứng dụng phân tán, với đề tài **Hệ thống Quản trị Kinh doanh** — một hệ thống được xây dựng theo kiến trúc microservices. Em là Tuấn Kiệt, đại diện nhóm mở đầu phần trình bày với bối cảnh bài toán và tổng quan kiến trúc; sau đó bạn Long và bạn Lý sẽ trình bày các phần tiếp theo.
+Em xin kính chào thầy và các bạn. Nhóm em gồm 3 thành viên, hôm nay xin trình bày đồ án môn Ứng dụng phân tán, với đề tài **Hệ thống Quản trị Kinh doanh** — một hệ thống được xây dựng theo kiến trúc microservices. Em là Tuấn Kiệt, đại diện nhóm mở đầu phần trình bày với bối cảnh bài toán và tổng quan kiến trúc; sau đó bạn Long và bạn Lý sẽ trình bày các phần tiếp theo.
 
 **[Slide 2 — Nội dung]**
 Bài trình bày của nhóm em gồm 11 phần. Nhóm em sẽ đi từ bài toán thực tế của doanh nghiệp, đến cách thiết kế kiến trúc và dữ liệu, rồi các cơ chế cốt lõi của một hệ phân tán như quy trình duyệt, ký điện tử và xử lý bất đồng bộ. Cuối cùng là phần demo, triển khai và kiểm thử. *Chúng ta bắt đầu với phần đầu tiên — bài toán.*
